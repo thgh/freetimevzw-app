@@ -3,7 +3,8 @@ angular.module('ftController', [])
 .controller('mainController', ['$scope', 'People', 'Tasks',
   function($scope, People, Tasks) {
     $scope.peopleForm = {};
-    $scope.tasksForm = {};
+    $scope.editTaskForm = {};
+    $scope.addTaskForm = {};
     $scope.grid = [{
       name: 'Maandag',
       morning: [{
@@ -23,8 +24,9 @@ angular.module('ftController', [])
     }];
 
     // Highlight current day
-    var d = new Date();
-    $scope.weekday = d.getDay()-1;
+    var d = new Date().getDay();
+    if (d === 0 || d === 6) d = 1;
+    $scope.weekday = --d;
 
     $scope.fillGrid = function(id) {
       if (!$scope.people) return false;
@@ -61,6 +63,20 @@ angular.module('ftController', [])
         $scope.grid[g].morningPeople = poolSwitch ? pool1 : pool2;
         $scope.grid[g].afternoonPeople = poolSwitch ? pool2 : pool1;
 
+        // Add tasks
+        angular.forEach($scope.tasks, function(v, t) {
+          $scope.grid[g].morning.push({
+            text: v.text,
+            long: [],
+            short: []
+          });
+          $scope.grid[g].afternoon.push({
+            text: v.text2 || v.text,
+            long: [],
+            short: []
+          });
+        });
+
         // Shift array for each day like this: +1 -2 +3 -4 +5 ...
         for (var i = 0; i < (shiftInverse ? pool1.length - shifts : shifts); i++) {
           pool1.push(pool1.shift());
@@ -69,28 +85,41 @@ angular.module('ftController', [])
         shifts++;
         shifts %= numPeople;
         shiftInverse = !shiftInverse;
-        // Add tasks
-        angular.forEach($scope.tasks, function(v, t) {
-          $scope.grid[g].morning.push({
-            name: v.text,
-            people: []
-          });
-          $scope.grid[g].afternoon.push({
-            name: v.text,
-            people: []
-          });
-        });
 
-        // Add morning people
+        // Add morning
+        // Long shift
         var curTask = 0;
         angular.forEach((poolSwitch ? pool1 : pool2), function(person, p) {
-          $scope.grid[g].morning[curTask].people.push(person);
+          $scope.grid[g].morning[curTask].long.push(person);
           curTask = (curTask + 1) % numTasks;
         });
-        // Add afternoon people
+        // Short shift
         var curTask = 0;
         angular.forEach((poolSwitch ? pool2 : pool1), function(person, p) {
-          $scope.grid[g].afternoon[curTask].people.push(person);
+          $scope.grid[g].morning[curTask].short.push(person);
+          curTask = (curTask + 1) % numTasks;
+        });
+
+        // Shift array for each day like this: +1 -2 +3 -4 +5 ...
+        for (var i = 0; i < (shiftInverse ? pool1.length - shifts : shifts); i++) {
+          pool1.push(pool1.shift());
+          pool2.push(pool2.shift());
+        }
+        shifts++;
+        shifts %= numPeople;
+        shiftInverse = !shiftInverse;
+
+        // Add afternoon
+        // Long shift
+        var curTask = 0;
+        angular.forEach((poolSwitch ? pool1 : pool2), function(person, p) {
+          $scope.grid[g].afternoon[curTask].long.push(person);
+          curTask = (curTask + 1) % numTasks;
+        });
+        // Short shift
+        var curTask = 0;
+        angular.forEach((poolSwitch ? pool2 : pool1), function(person, p) {
+          $scope.grid[g].afternoon[curTask].short.push(person);
           curTask = (curTask + 1) % numTasks;
         });
 
@@ -111,7 +140,21 @@ angular.module('ftController', [])
       });*/
     };
 
+    $scope.taskLong = function() {
+      var count = 0;
+      angular.forEach($scope.tasks, function(v, k) {
+        count += v.long;
+      });
+      return count;
+    };
 
+    $scope.taskShort = function() {
+      var count = 0;
+      angular.forEach($scope.tasks, function(v, k) {
+        count += v.short;
+      });
+      return count;
+    };
 
     People.get()
       .success(function(data) {
@@ -146,19 +189,42 @@ angular.module('ftController', [])
       });
 
     $scope.createTask = function() {
-      if ($scope.tasksForm.text != undefined) {
-        Tasks.create($scope.tasksForm)
+      if ($scope.addTaskForm.text) {
+        Tasks.create($scope.addTaskForm)
           .success(function(data) {
-            $scope.tasksForm = {};
+            $scope.addTaskForm = {};
             $scope.tasks = data;
             $scope.fillGrid();
           });
       }
     };
 
-    $scope.deleteTask = function(id) {
-      Tasks.delete(id)
+    $scope.editTask = function(t, task) {
+      $scope.editTaskForm = angular.copy(task);
+      $scope.editTaskForm.show = true;
+    };
+
+    $scope.updateTask = function(task) {
+      Tasks.update($scope.editTaskForm)
         .success(function(data) {
+          $scope.editTaskForm = {};
+          $scope.tasks = data;
+          $scope.fillGrid();
+        });
+    };
+
+    $scope.deleteTask = function() {
+      angular.forEach($scope.tasks, function(v, k) {
+        if (v._id === $scope.editTaskForm._id) {
+          console.log('delete')
+          console.log($scope.tasks[k]);
+          $scope.tasks.splice(k, 1);
+          $scope.fillGrid();
+        }
+      });
+      Tasks.delete($scope.editTaskForm._id)
+        .success(function(data) {
+          $scope.editTaskForm = {};
           $scope.tasks = data;
           $scope.fillGrid();
         });

@@ -11,6 +11,9 @@ angular.module('taskService', [])
       create: function(taskData) {
         return $http.post('/api/tasks', taskData);
       },
+      update: function(taskData) {
+        return $http.post('/api/tasks/' + taskData._id, taskData);
+      },
       delete: function(id) {
         return $http.delete('/api/tasks/' + id);
       }

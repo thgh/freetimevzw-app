@@ -76,14 +76,32 @@ module.exports = function(app) {
   app.post('/api/tasks', function(req, res) {
 
     // create a task, information comes from AJAX request from Angular
-    Task.create({
-      text: req.body.text,
-      done: false
-    }, function(err, task) {
+    Task.create(req.body, function(err, task) {
       if (err)
         res.send(err);
 
       // get and return all the tasks after you create another
+      Task.find(function(err, tasks) {
+        if (err)
+          res.send(err)
+        res.json(tasks);
+      });
+    });
+
+  });
+
+  // update task
+  app.post('/api/tasks/:task_id', function(req, res) {
+
+    var data = req.body;
+    delete data._id;
+
+    Task.update({
+      _id: req.params.task_id
+    }, data, function(err, task) {
+      if (err)
+        res.send(err);
+
       Task.find(function(err, tasks) {
         if (err)
           res.send(err)
