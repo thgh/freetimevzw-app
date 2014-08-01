@@ -1,0 +1,195 @@
+<!doctype html>
+<html class="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Opvangregeling</title>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+  <style>
+  * {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+  }
+  html,
+  body {
+    font-size: 1em;
+    font-family: roboto, "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue";
+    line-height: 1.5em;
+  }
+  header {
+    background: #006239;
+    color: #fff;
+  }
+  header .container {
+    padding: 1rem
+  }
+  header .for {
+    float: right;
+  }
+  header span {
+    font-weight: bold;
+    color: #fff;
+  }
+  header dd {
+    line-height: 1.5em;
+  }
+  .container {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .table>thead> tr>td,
+  .table>tbody> tr>td {
+    padding-left: 15px;
+    white-space: nowrap;
+  }
+  article {
+    line-height: 2em;
+    padding: 1rem;
+    padding-top: 1.25rem;
+    border-bottom: 1px solid #ccc;
+  }
+  article.done {
+    color: #999
+  }
+  h3 {
+    color: #999;
+    text-align: center;
+    text-transform: uppercase;
+    position: relative;
+    top: -2rem;
+    margin-bottom: -2rem;
+  }
+  .row:before,
+  .row:after {
+    display: table;
+    content: "";
+    line-height: 0;
+  }
+  .row:after {
+    clear: both;
+  }
+  dl {
+    float: left;
+    width: 50%;
+    overflow: hidden;
+  }
+  dl:nth-of-type(even) {
+    text-align: right;
+  }
+  dd {
+    font-size: 1.6em;
+  }
+  b {
+    font-weight: bold;
+  }
+  a {
+    color: #F78406;
+    text-decoration: none;
+  }
+  .dark body {
+    background-color: #006239;
+    color: #fff
+  }
+  .dark header {
+    background-color: #2C3531;
+  }
+  .dark h3 {
+    color: #F78406
+  }
+  .dark article {
+    border-bottom: 1px solid #2C3531;
+  }
+  </style>
+</head>
+
+<body ng-controller="mainController">
+  <header>
+    <div class="container row">
+      <dl>
+        <dd>Opvangregeling</dd>
+        <dt><b>P6</b> Sint-Paulus
+        </dt>
+      </dl>
+      <dl>
+        <a href="/">
+          <dd>
+            Thomas
+          </dd>
+          <dt>complete lijst &rArr;
+          </dt>
+        </a>
+      </dl>
+    </div>
+  </header>
+  <main class="container">
+    <article class="row">
+      <dl>
+        <dd>Troostmoni</dd>
+        <dt>vanaf <b>7u30</b>
+        </dt>
+      </dl>
+      <dl>
+        <dd>Opvang</dd>
+        <dt>tot <b>17u00</b>
+        </dt>
+      </dl>
+      <h3>Maandag</h3>
+    </article>
+    <article class="row">
+      <dl>
+        <dd>Inschrijven</dd>
+        <dt>vanaf <b>8u30</b>
+        </dt>
+      </dl>
+      <dl>
+        <dd>Springkasteel</dd>
+        <dt>tot <b>18u00</b>
+        </dt>
+      </dl>
+      <h3>Dinsdag</h3>
+    </article>
+    <article class="row">
+      <dl>
+        <dd>Parking</dd>
+        <dt>vanaf <b>7u30</b>
+        </dt>
+      </dl>
+      <dl>
+        <dd>Uitschrijven</dd>
+        <dt>tot <b>17u00</b>
+        </dt>
+      </dl>
+      <h3>Woensdag</h3>
+    </article>
+    <article class="row">
+      <dl>
+        <dd>Inschrijven</dd>
+        <dt>vanaf <b>8u30</b>
+        </dt>
+      </dl>
+      <dl>
+        <dd>Opvang</dd>
+        <dt>tot <b>18u00</b>
+        </dt>
+      </dl>
+      <h3>Donderdag</h3>
+    </article>
+    <article class="row">
+      <dl>
+        <dd>Opvang</dd>
+        <dt>vanaf <b>7u30</b>
+        </dt>
+      </dl>
+      <dl>
+        <dd>Opkuis WC</dd>
+        <dt>tot <b>18u00</b>
+        </dt>
+      </dl>
+      <h3>Vrijdag</h3>
+    </article>
+  </main>
+</body>
+
+</html>
