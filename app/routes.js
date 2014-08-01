@@ -22,14 +22,32 @@ module.exports = function(app) {
   app.post('/api/people', function(req, res) {
 
     // create a person, information comes from AJAX request from Angular
-    Person.create({
-      text: req.body.text,
-      done: false
-    }, function(err, person) {
+    Person.create(req.body, function(err, person) {
       if (err)
         res.send(err);
 
       // get and return all the people after you create another
+      Person.find(function(err, people) {
+        if (err)
+          res.send(err)
+        res.json(people);
+      });
+    });
+
+  });
+
+  // update person
+  app.post('/api/people/:person_id', function(req, res) {
+
+    var data = req.body;
+    delete data._id;
+
+    Person.update({
+      _id: req.params.person_id
+    }, data, function(err, person) {
+      if (err)
+        res.send(err);
+
       Person.find(function(err, people) {
         if (err)
           res.send(err)

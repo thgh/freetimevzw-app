@@ -17,14 +17,16 @@
     padding: 0;
   }
   .scrollable section {
-    width: 2500px;
+    width: 3000px;
     margin: 0 auto;
   }
   .day {
     float: left;
-    width: 18%;
-    margin-right: 2%;
-    padding: 20px 40px;
+    width: 20%;
+    padding: 0 50px;
+  }
+  .period {
+    padding: 20px 0;
   }
   .gridwrapper {
     margin-bottom: 20px;
@@ -58,53 +60,38 @@
   <div class="gridwrapper">
     <div class="container scrollable">
       <section id="grid" class="clearfix">
-        <div ng-repeat="(d, day) in grid" class="day" ng-class="{today:weekday==$index}">
-          <h2>{{day.name}}</h2>
-          <table class="table" ng-class="{'table-condensed':1}">
-            <thead>
-              <tr>
-                <th>Ochtend</th>
-                <th>vanaf <b>7u30</b>
-                </th>
-                <th>vanaf <b>8u30</b>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr ng-repeat="(t, task) in day.morning">
-                <th ng-bind="task.text"></th>
-                <td>
-                  <div ng-repeat="(p, person) in task.long">{{ person }}</div>
-                </td>
-                <td>
-                  <div ng-repeat="(p, person) in task.short">{{ person }}</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <br>
-          <table class="table" ng-class="{'table-condensed':1}">
-            <thead>
-              <tr>
-                <th>Avond</th>
-                <th>tot <b>17u00</b>
-                </th>
-                <th>tot <b>18u00</b>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr ng-repeat="(t, task) in day.afternoon">
-                <th ng-bind="task.text"></th>
-                <td>
-                  <div ng-repeat="(p, person) in task.short">{{ person }}</div>
-                </td>
-                <td>
-                  <div ng-repeat="(p, person) in task.long">{{ person }}</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div ng-repeat="(d, dayPeriods) in shiftDays" class="day" ng-class="{today:today(d)}">
+          <div ng-repeat="(p, period) in dayPeriods" class="period">
+            <h2 ng-show="p===0">{{period.day}}</h2>
+            <table class="table" ng-class="{'table-condensed':people.length>18}">
+              <thead>
+                <tr ng-show="p===0">
+                  <th>Ochtend</th>
+                  <th>vanaf <b>7u30</b>
+                  </th>
+                  <th>vanaf <b>8u30</b>
+                  </th>
+                </tr>
+                <tr ng-hide="p===0">
+                  <th>Avond</th>
+                  <th>tot <b>17u00</b>
+                  </th>
+                  <th>tot <b>18u00</b>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="(t, task) in period.tasks">
+                  <th ng-bind="task.text||task.text2||task.name"></th>
+                  <td ng-repeat="(d, duration) in task.duration">
+                    <div ng-repeat="(p, person) in duration track by $index">
+                      {{ person || '•' }}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
     </div>
@@ -112,23 +99,55 @@
 
   <div class="container">
     <h1>
-      Instellingen
+      Instellingen - Cost: {{ stats.cost }}
     </h1>
-    <h2>Animatoren</h2>
+    <p>
+      <button type="button" ng-click="calcStats()">Stats</button>
+      <button type="button" ng-click="guess(10)">Fill</button>
+    </p>
+    <h2>Animatoren {{ people.length }}</h2>
     <section id="people">
-      <p class="people-list">
-        <button class="btn btn-lg btn-success">{{ people.length }} animatoren</button>
-        <span ng-repeat="person in people" ng-click="deletePerson(person._id)" class="btn btn-default btn-lg">
-          {{ person.text }}
-        </span>
-      </p>
+      <p>variantie</p>
+      <pre>{{stats|json}}</pre>
       <form>
-        <p>
-          <input type="text" class="form-control input-lg text-center" placeholder="Naam" ng-model="peopleForm.text" autocapitalize="on">
-        </p>
-        <p>
-          <button type="submit" class="btn btn-success btn-lg" ng-click="createPerson()">Animator toevoegen</button>
-        </p>
+        <div class="row">
+          <div class="col-sm-6">
+            <h3>Groep 1 [{{numPool1}}]</h3>
+            <ul>
+              <li ng-repeat="(p, person) in people" ng-show="person.pool===1">
+                <span ng-click="people[p].pool=2;updatePerson(person)">
+                  {{ person.text }}</span>
+                <a href="" ng-click="deletePerson(person._id)">remove</a>
+              </li>
+              <li>
+                <a href="" ng-click="peopleForm.pool=1">Toevoegen aan groep 1</a>
+              </li>
+            </ul>
+          </div>
+          <div class="col-sm-6">
+            <h3>Groep 2 [{{numPool2}}]</h3>
+            <ul>
+              <li ng-repeat="(p, person) in people" ng-show="person.pool===2">
+                <span ng-click="people[p].pool=1;updatePerson(person)">
+                  {{ person.text }}</span>
+                <a href="" ng-click="deletePerson(person._id)">remove</a>
+              </li>
+              <li>
+                <a href="" ng-click="peopleForm.pool=2">Toevoegen aan groep 2</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="row">
+          <div ng-class="{'col-sm-offset-6':peopleForm.pool===2}" class="col-sm-6">
+            <p>
+              <input type="text" class="form-control" placeholder="Naam" ng-model="peopleForm.text" autocapitalize="on">
+            </p>
+            <p>
+              <button type="submit" class="btn btn-success" ng-click="createPerson()">Animator toevoegen</button>
+            </p>
+          </div>
+        </div>
       </form>
     </section>
   </div>
@@ -138,12 +157,12 @@
       <p class="pull-right">
         <button type="button" ng-click="addTaskForm.show=!addTaskForm.show" class="btn btn-default">Taak toevoegen</button>
       </p>
-      <h2>Taken</h2>
+      <h2>Taken {{ taskLong + taskShort }}</h2>
       <div class="table-responsive">
         <table class="table table-hover">
           <thead>
-            <th width="100px">Lang {{taskLong()}}</th>
-            <th width="100px">Kort {{taskShort()}}</th>
+            <th width="100px">Lang {{ taskLong }}</th>
+            <th width="100px">Kort {{ taskShort }}</th>
             <th>Taken</th>
           </thead>
           <tbody>
@@ -165,16 +184,16 @@
       <h3>Taak bewerken</h3>
       <form name="editTaskFormName">
         <div class="row">
-          <div class="col-sm-2 col-xs-6">
+          <div class="col-sm-2">
             <p>
               <label>Aantal lang</label>
               <input type="number" ng-model="editTaskForm.long" placeholder="#" class="form-control">
             </p>
           </div>
-          <div class="col-sm-2 col-xs-6">
+          <div class="col-sm-2">
             <p>
               <label>Aantal kort</label>
-              <input type="integer" placeholder="#" class="form-control">
+              <input type="number" ng-model="editTaskForm.short" placeholder="#" class="form-control">
             </p>
           </div>
           <div class="col-sm-4">
@@ -204,13 +223,13 @@
           <div class="col-sm-2">
             <p>
               <label for="taskLong">Aantal lang</label>
-              <input type="number" id="taskLong" ng-model="addTaskForm.long" placeholder="1" class="form-control">
+              <input type="number" id="taskLong" ng-model="addTaskForm.long" placeholder="#" class="form-control">
             </p>
           </div>
           <div class="col-sm-2">
             <p>
               <label for="taskShort">Aantal kort</label>
-              <input type="number" id="taskShort" ng-model="addTaskForm.short" placeholder="0" class="form-control">
+              <input type="number" id="taskShort" ng-model="addTaskForm.short" placeholder="#" class="form-control">
             </p>
           </div>
           <div class="col-sm-4">

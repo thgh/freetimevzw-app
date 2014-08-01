@@ -11,6 +11,9 @@ angular.module('personService', [])
       create: function(personData) {
         return $http.post('/api/people', personData);
       },
+      update: function(personData) {
+        return $http.post('/api/people/' + personData._id, personData);
+      },
       delete: function(id) {
         return $http.delete('/api/people/' + id);
       }
